@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum EquipmentType {
+  PADDLE
+  SHOE
+}
+
+enum TournamentTier {
+  MAJOR
+  PPA
+  MLP
+  APP
+  OTHER
+}
+
+model Player {
+  id              String            @id @default(cuid())
+  name            String
+  slug            String            @unique
+  ranking         Int?
+  country         String?
+  imageUrl        String?
+  deletedAt       DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  equipmentUsages EquipmentUsage[]
+  matchResults    MatchResult[]
+
+  @@index([slug])
+  @@index([deletedAt])
+}
+
+model Equipment {
+  id          String            @id @default(cuid())
+  name        String
+  slug        String            @unique
+  brand       String
+  type        EquipmentType
+  imageUrl    String?
+  description String?
+  specs       Json?
+  deletedAt   DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  usages      EquipmentUsage[]
+
+  @@index([type, brand])
+  @@index([slug])
+  @@index([deletedAt])
+}
+
+model EquipmentUsage {
+  id          String    @id @default(cuid())
+  playerId    String
+  equipmentId String
+  startDate   DateTime  @default(now())
+  endDate     DateTime?
+  verified    Boolean   @default(false)
+  source      String?
+  player      Player    @relation(fields: [playerId], references: [id], onDelete: Restrict)
+  equipment   Equipment @relation(fields: [equipmentId], references: [id], onDelete: Restrict)
+
+  @@unique([playerId, equipmentId, startDate])
+  @@index([playerId, startDate, endDate])
+  @@index([equipmentId])
+}
+
+model Tournament {
+  id           String        @id @default(cuid())
+  name         String
+  slug         String        @unique
+  tier         TournamentTier
+  startDate    DateTime
+  endDate      DateTime
+  location     String?
+  deletedAt    DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  matchResults MatchResult[]
+
+  @@index([slug])
+  @@index([tier])
+  @@index([startDate])
+  @@index([deletedAt])
+}
+
+model MatchResult {
+  id           String     @id @default(cuid())
+  playerId     String
+  tournamentId String
+  placement    Int
+  points       Int
+  matchDate    DateTime
+  eventType    String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  player       Player     @relation(fields: [playerId], references: [id], onDelete: Restrict)
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Restrict)
+
+  @@unique([playerId, tournamentId, eventType])
+  @@index([playerId, matchDate])
+  @@index([tournamentId])
+  @@index([placement])
+}
