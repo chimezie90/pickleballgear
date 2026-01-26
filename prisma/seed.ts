@@ -1,10 +1,22 @@
 import { PrismaClient, TournamentTier, EquipmentType } from "@prisma/client";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 import { calculatePoints } from "../src/lib/calculations";
+import { config } from "dotenv";
 
-const adapter = new PrismaBetterSqlite3({
-  url: "file:./dev.db",
-});
+// Load env files - must be before accessing process.env
+config({ path: ".env.local" });
+config({ path: ".env" });
+
+const connectionString = process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL;
+if (!connectionString) {
+  throw new Error("DATABASE_URL is not set");
+}
+
+console.log("Connecting to:", connectionString.replace(/:[^:@]+@/, ":****@"));
+
+const pool = new Pool({ connectionString });
+const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
