@@ -37,18 +37,19 @@ model Player {
 }
 
 model Equipment {
-  id          String            @id @default(cuid())
-  name        String
-  slug        String            @unique
-  brand       String
-  type        EquipmentType
-  imageUrl    String?
-  description String?
-  specs       Json?
-  deletedAt   DateTime?
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  usages      EquipmentUsage[]
+  id             String            @id @default(cuid())
+  name           String
+  slug           String            @unique
+  brand          String
+  type           EquipmentType
+  imageUrl       String?
+  description    String?
+  specs          Json?
+  deletedAt      DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  usages         EquipmentUsage[]
+  affiliateLinks AffiliateLink[]
 
   @@index([type, brand])
   @@index([slug])
@@ -107,4 +108,36 @@ model MatchResult {
   @@index([playerId, matchDate])
   @@index([tournamentId])
   @@index([placement])
+}
+
+model AffiliateLink {
+  id          String    @id @default(cuid())
+  equipmentId String
+  retailer    String // "selkirk", "justpaddles", "pickleballsuperstore", "amazon"
+  url         String
+  priority    Int       @default(0) // Higher = preferred
+  commission  Float? // Percentage for tracking
+  validatedAt DateTime?
+  expiresAt   DateTime?
+  isActive    Boolean   @default(true)
+  equipment   Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([equipmentId, retailer])
+  @@index([equipmentId, priority])
+}
+
+model DataSourceMapping {
+  id           String   @id @default(cuid())
+  entityType   String // "player", "tournament", "equipment"
+  internalId   String
+  sourceName   String // "ppa", "apt", "theslice"
+  externalId   String
+  lastSyncedAt DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([sourceName, entityType, externalId])
+  @@index([entityType, internalId])
 }

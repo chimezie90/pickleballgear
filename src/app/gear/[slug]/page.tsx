@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Stat } from "@/components/ui/stat";
+import { PurchaseButton } from "@/components/gear/purchase-button";
 import { getEquipmentBySlug, getEquipmentLeaderboard } from "@/lib/data/equipment";
 import type { PaddleSpecs, ShoeSpecs } from "@/lib/types/equipment";
 
@@ -69,6 +70,17 @@ export default async function EquipmentPage({ params }: EquipmentPageProps) {
 
           {equipment.description && (
             <p className="text-muted">{equipment.description}</p>
+          )}
+
+          {/* Purchase Button */}
+          {equipment.affiliateLinks.length > 0 && (
+            <div className="mt-6 max-w-xs">
+              <PurchaseButton
+                affiliateLinks={equipment.affiliateLinks}
+                equipmentName={equipment.name}
+                showAllRetailers
+              />
+            </div>
           )}
         </div>
 

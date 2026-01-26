@@ -85,6 +85,10 @@ export const getEquipmentBySlug = unstable_cache(
             },
           },
         },
+        affiliateLinks: {
+          where: { isActive: true },
+          orderBy: { priority: "desc" },
+        },
       },
     });
   },
