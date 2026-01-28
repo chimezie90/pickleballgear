@@ -92,7 +92,7 @@ export const getEquipmentBySlug = unstable_cache(
       },
     });
   },
-  ["equipment-by-slug"],
+  ["equipment-by-slug-v2"],
   { revalidate: 3600, tags: ["equipment"] }
 );
 

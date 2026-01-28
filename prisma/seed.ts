@@ -22,6 +22,16 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   console.log("Seeding database...");
 
+  // Clear existing data in correct order (respecting foreign keys)
+  console.log("Clearing existing data...");
+  await prisma.affiliateLink.deleteMany();
+  await prisma.matchResult.deleteMany();
+  await prisma.equipmentUsage.deleteMany();
+  await prisma.tournament.deleteMany();
+  await prisma.player.deleteMany();
+  await prisma.equipment.deleteMany();
+  console.log("Existing data cleared.");
+
   // Create Equipment - Paddles
   const paddles = await Promise.all([
     prisma.equipment.create({
@@ -329,14 +339,14 @@ async function main() {
     }),
   ]);
 
-  // Create Affiliate Links for equipment
+  // Create Affiliate Links for equipment - using Amazon search URLs for better product discovery
   const affiliateLinks = await Promise.all([
     // JOOLA Ben Johns Hyperion - multiple retailers
     prisma.affiliateLink.create({
       data: {
         equipmentId: paddles[0].id,
         retailer: "amazon",
-        url: "https://www.amazon.com/JOOLA-Ben-Johns-Hyperion-Pickleball/dp/B0BQXYZ123?tag=pickleballgear-20",
+        url: "https://www.amazon.com/s?k=JOOLA+Ben+Johns+Hyperion+CFS+16+Pickleball+Paddle&tag=pickleballgear-20",
         priority: 1,
         commission: 0.03,
         isActive: true,
@@ -346,7 +356,7 @@ async function main() {
       data: {
         equipmentId: paddles[0].id,
         retailer: "justpaddles",
-        url: "https://www.justpaddles.com/joola-ben-johns-hyperion?ref=pbgear",
+        url: "https://www.justpaddles.com/products/pickleball-paddles?search=joola+ben+johns+hyperion",
         priority: 2,
         commission: 0.07,
         isActive: true,
@@ -357,7 +367,7 @@ async function main() {
       data: {
         equipmentId: paddles[1].id,
         retailer: "selkirk",
-        url: "https://www.selkirk.com/products/luxx-control-air-s2?avad=pbgear123",
+        url: "https://www.selkirk.com/collections/paddles?q=luxx+control+air",
         priority: 3,
         commission: 0.15,
         isActive: true,
@@ -366,10 +376,10 @@ async function main() {
     prisma.affiliateLink.create({
       data: {
         equipmentId: paddles[1].id,
-        retailer: "pickleballsuperstore",
-        url: "https://www.pickleballsuperstore.com/selkirk-luxx-control?aff=pbgear",
+        retailer: "amazon",
+        url: "https://www.amazon.com/s?k=Selkirk+LUXX+Control+Air+Pickleball+Paddle&tag=pickleballgear-20",
         priority: 2,
-        commission: 0.32,
+        commission: 0.03,
         isActive: true,
       },
     }),
@@ -378,7 +388,7 @@ async function main() {
       data: {
         equipmentId: paddles[2].id,
         retailer: "amazon",
-        url: "https://www.amazon.com/Franklin-Ben-Johns-Signature-Paddle/dp/B0BQABC456?tag=pickleballgear-20",
+        url: "https://www.amazon.com/s?k=Franklin+Ben+Johns+Signature+Pickleball+Paddle&tag=pickleballgear-20",
         priority: 1,
         commission: 0.03,
         isActive: true,
@@ -388,10 +398,10 @@ async function main() {
     prisma.affiliateLink.create({
       data: {
         equipmentId: paddles[3].id,
-        retailer: "justpaddles",
-        url: "https://www.justpaddles.com/paddletek-bantam-ex-l-pro?ref=pbgear",
-        priority: 2,
-        commission: 0.07,
+        retailer: "amazon",
+        url: "https://www.amazon.com/s?k=Paddletek+Bantam+EX-L+Pro+Pickleball+Paddle&tag=pickleballgear-20",
+        priority: 1,
+        commission: 0.03,
         isActive: true,
       },
     }),
@@ -399,10 +409,10 @@ async function main() {
     prisma.affiliateLink.create({
       data: {
         equipmentId: paddles[4].id,
-        retailer: "pickleballsuperstore",
-        url: "https://www.pickleballsuperstore.com/engage-pursuit-pro-mx?aff=pbgear",
-        priority: 2,
-        commission: 0.32,
+        retailer: "amazon",
+        url: "https://www.amazon.com/s?k=Engage+Pursuit+Pro+MX+Pickleball+Paddle&tag=pickleballgear-20",
+        priority: 1,
+        commission: 0.03,
         isActive: true,
       },
     }),
@@ -411,7 +421,7 @@ async function main() {
       data: {
         equipmentId: shoes[0].id,
         retailer: "amazon",
-        url: "https://www.amazon.com/K-Swiss-Hypercourt-Express-Court-Shoe/dp/B0BQDEF789?tag=pickleballgear-20",
+        url: "https://www.amazon.com/s?k=K-Swiss+Hypercourt+Express+2+Tennis+Shoes&tag=pickleballgear-20",
         priority: 1,
         commission: 0.03,
         isActive: true,
@@ -422,7 +432,7 @@ async function main() {
       data: {
         equipmentId: shoes[1].id,
         retailer: "amazon",
-        url: "https://www.amazon.com/ASICS-Gel-Rocket-11-Volleyball-Shoe/dp/B0BQGHI012?tag=pickleballgear-20",
+        url: "https://www.amazon.com/s?k=ASICS+Gel+Rocket+11+Court+Shoes&tag=pickleballgear-20",
         priority: 1,
         commission: 0.03,
         isActive: true,
@@ -433,7 +443,7 @@ async function main() {
       data: {
         equipmentId: shoes[2].id,
         retailer: "amazon",
-        url: "https://www.amazon.com/Nike-Court-Zoom-Vapor-Tennis/dp/B0BQJKL345?tag=pickleballgear-20",
+        url: "https://www.amazon.com/s?k=Nike+Court+Air+Zoom+Vapor+Pro+2+Tennis+Shoes&tag=pickleballgear-20",
         priority: 1,
         commission: 0.03,
         isActive: true,
@@ -444,7 +454,7 @@ async function main() {
       data: {
         equipmentId: shoes[3].id,
         retailer: "amazon",
-        url: "https://www.amazon.com/New-Balance-Fresh-Foam-Tennis/dp/B0BQMNO678?tag=pickleballgear-20",
+        url: "https://www.amazon.com/s?k=New+Balance+Fresh+Foam+LAV+v2+Tennis+Shoes&tag=pickleballgear-20",
         priority: 1,
         commission: 0.03,
         isActive: true,
